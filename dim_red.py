@@ -50,7 +50,7 @@ data_dict = dict()
 for name, value in low_dims:
   data_dict[name] = list(value)
 # dump to json
-data_json = open("data_vis", "w")
+data_json = open("data_vis.js", "w")
 data_json.write("data_vis = "+json.dumps(data_dict)+"\n")
 
 
