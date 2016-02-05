@@ -1,4 +1,4 @@
-
+#combines vectorization via tf-idf and svd into one script
 
 import numpy as np
 import matplotlib.pyplot as plt
