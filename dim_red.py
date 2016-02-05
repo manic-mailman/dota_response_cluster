@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import normalize
 import json
 
 execfile("vectorize.py")
@@ -12,18 +13,25 @@ def get_bag_of_word(aline):
 
   hero = splitted[0].replace("\n","")
   hero_words = splitted[1:]
-  # artifically add 1 because io and phoenix can have errors(they have no words)
-  total = len(hero_words)+1
 
-  bag = [1.0 for i in range(n_words)]
+  bag = [1.0001 for i in range(n_words)]
   for hero_w in hero_words:
     if hero_w in word_to_num:
       bag[word_to_num[hero_w]] += 1.0
 
-  # take a log to curb the outlyers
-  bag = [np.log(x) for x in bag]
+  bag = np.array(bag)
 
-  bag = np.array(bag, np.float64) / total
+  # take a log to curb the outlyers
+  bag = np.log(bag)
+  # normalize
+  print hero, sum(bag)
+  bag = bag / (sum(bag) + 1)
+
+#  bag = [0.0 for i in range(n_words)]
+#  for hero_w in hero_words:
+#    if hero_w in word_to_num:
+#      bag[word_to_num[hero_w]] = 1.0
+  
   return (hero, bag)
 
 # transform a hero_words pair to a low-dim representation
@@ -36,7 +44,13 @@ def red_dim(hero_bags, pca):
   return zip(hero_names, hero_low_dim)
 
 fd = open("data", "r")
-all_hero_bags = [get_bag_of_word(aline) for aline in fd.readlines()]
+
+# for hack we're removing spectre or phoenix or io, they say weird things
+all_hero_bags = []
+for aline in fd.readlines():
+  aja = get_bag_of_word(aline)
+  if aja[0] not in ["Spectre", "Phoenix", "Io"]:
+    all_hero_bags.append(aja)
 
 # np array version for all the original high-dim spaced bags
 original_bag_pts = np.array([x[1] for x in all_hero_bags])
